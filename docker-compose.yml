@@ -1,0 +1,12 @@
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      network: host
+    container_name: rag-agent-api
+    env_file: api/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api:/app
