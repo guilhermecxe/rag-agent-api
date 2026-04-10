@@ -1,0 +1,12 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.bin
+*.pt
+*.gguf
+data/
+uploads/
+.git/

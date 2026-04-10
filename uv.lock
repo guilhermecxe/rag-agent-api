@@ -10,6 +10,11 @@ resolution-markers = [
     "python_full_version < '3.13' and sys_platform == 'darwin'",
 ]
 
+[manifest]
+members = [
+    "rag-agent-api",
+]
+
 [[package]]
 name = "aiohappyeyeballs"
 version = "2.6.1"
@@ -2101,7 +2106,7 @@ wheels = [
 [[package]]
 name = "rag-agent-api"
 version = "0.1.0"
-source = { virtual = "." }
+source = { virtual = "api" }
 dependencies = [
     { name = "fastapi" },
     { name = "langchain" },

@@ -6,7 +6,11 @@ services:
       network: host
     container_name: rag-agent-api
     env_file: api/.env
+    environment:
+      - UV_LINK_MODE=copy
+      - TRANSFORMERS_VERBOSITY=error
     ports:
       - "8000:8000"
     volumes:
       - ./api:/app
+  
