@@ -10,6 +10,7 @@ dependencies = [
     "langchain-chroma==1.1.0",
     "langchain-community==0.4.1",
     "langchain-huggingface==1.2.1",
+    "langchain-openai==1.1.12",
     "pymupdf==1.27.2.2",
     "python-dotenv==1.2.2",
     "python-multipart==0.0.24",

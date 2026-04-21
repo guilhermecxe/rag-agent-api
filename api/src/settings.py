@@ -6,4 +6,8 @@ class Settings(BaseSettings):
 
     # Chroma
     chroma_collection_name: str = "chroma_collection"
-    chroma_persist_directory: str = "chroma_db"
+    chroma_persist_directory: str = "data/chroma_db"
+
+    # Agent
+    rag_agent_default_model: str = "openai:gpt-4o-mini"
+    search_documents_limit: int = 5

@@ -7,13 +7,15 @@ from src.services.chroma_service import ChromaService
 from src.services.files_service import FilesService
 from src.services.pdf_service import PDFService
 
+from src.agents.rag_agent import RAGAgent
 
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()
 
-def get_embeddings_service(settings: Settings = Depends(get_settings)) -> EmbeddingsService:
-    return EmbeddingsService(settings=settings)
+@lru_cache()
+def get_embeddings_service() -> EmbeddingsService:
+    return EmbeddingsService(settings=get_settings())
 
 def get_chroma_service(
         embeddings_service: EmbeddingsService = Depends(get_embeddings_service),
@@ -32,3 +34,11 @@ def get_files_service(
         pdf_service: PDFService = Depends(get_pdf_service)
     ) -> FilesService:
     return FilesService(pdf_service=pdf_service, chroma_service=chroma_service)
+
+# --- Agents ---
+
+def get_rag_agent(
+        files_service: FilesService = Depends(get_files_service),
+        settings: Settings = Depends(get_settings)
+    ):
+    return RAGAgent(files_service, settings)
