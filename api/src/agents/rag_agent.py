@@ -1,5 +1,6 @@
 from langchain.chat_models import init_chat_model
 from langchain.agents import create_agent
+from langfuse.langchain import CallbackHandler
 
 from src.agents.tools.rag_tools import RAGToolkit
 from src.services.files_service import FilesService
@@ -37,8 +38,15 @@ class RAGAgent:
 
         input = {"messages": [{"role": "user", "content": message}]}
 
+        callbacks = [
+            # O cliente Langfuse é inicializado em api/main.py para
+            # o handler funcionar.
+            CallbackHandler()
+        ]
+
         response = await self._agent.ainvoke(
-            input=input
+            input=input,
+            config={"callbacks": callbacks}
         )
 
         result = response["messages"][-1].content

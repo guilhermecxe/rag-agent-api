@@ -1,4 +1,5 @@
-from fastapi import Depends
+from fastapi import Depends, Request
+from langfuse import Langfuse
 from functools import lru_cache
 
 from src.settings import Settings
@@ -17,23 +18,26 @@ def get_settings() -> Settings:
 def get_embeddings_service() -> EmbeddingsService:
     return EmbeddingsService(settings=get_settings())
 
-def get_chroma_service(
-        embeddings_service: EmbeddingsService = Depends(get_embeddings_service),
-        settings: Settings = Depends(get_settings)
-    ) -> ChromaService:
+@lru_cache()
+def get_chroma_service() -> ChromaService:
+    embeddings_service = get_embeddings_service()
     return ChromaService(
         embedding_function=embeddings_service.get_embeddings(),
-        settings=settings
+        settings=get_settings()
     )
 
+@lru_cache()
 def get_pdf_service():
     return PDFService()
 
-def get_files_service(
-        chroma_service: ChromaService = Depends(get_chroma_service),
-        pdf_service: PDFService = Depends(get_pdf_service)
-    ) -> FilesService:
-    return FilesService(pdf_service=pdf_service, chroma_service=chroma_service)
+@lru_cache()
+def get_files_service() -> FilesService:
+    return FilesService(
+        pdf_service=get_pdf_service(), chroma_service=get_chroma_service()
+    )
+
+def get_langfuse_client(request: Request) -> Langfuse:
+    return request.app.state.langfuse_client
 
 # --- Agents ---
 

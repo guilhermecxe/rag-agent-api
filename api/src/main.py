@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from langfuse import get_client
 from dotenv import load_dotenv
 from logging.handlers import RotatingFileHandler
 import logging
@@ -26,8 +27,11 @@ logging.getLogger().addHandler(log_handler)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting up the RAG Agent API...")
+    app.state.langfuse_client = get_client()
+
     yield
     print("Shutting down the RAG Agent API...")
+    app.state.langfuse_client.flush()
 
 
 app = FastAPI(

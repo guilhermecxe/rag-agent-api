@@ -4,7 +4,8 @@ WORKDIR /app
 
 # Instalando dependências do Python
 COPY pyproject.toml uv.lock ./
-RUN uv sync --no-dev
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --no-dev
 
 # Copiando o código da aplicação
 COPY . .

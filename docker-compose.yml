@@ -13,4 +13,8 @@ services:
       - "8000:8000"
     volumes:
       - ./api:/app
-  
+
+networks:
+  default:
+      name: rag-agent-network
+      external: true
