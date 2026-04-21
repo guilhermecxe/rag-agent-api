@@ -48,5 +48,4 @@ uv add --project api <package>
 - O chunking aplicado a PDFs é feito separando páginas.
 
 ## TODO
-- Adicionar autenticação/credenciais na API
 - Adicionar memória de curto e longo prazo aos agentes
