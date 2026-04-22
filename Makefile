@@ -10,6 +10,7 @@ help:
 	@echo "  make up        - Sobe todos os serviços"
 	@echo "  make down      - Derruba todos os serviços"
 	@echo "  make reset     - down + remove todos os volumes"
+	@echo "  make logs api  - Exibe logs do serviço que executa a api"
 	@echo "Obs. 1: Os comandos consideram que o langfuse utilizado é local."
 
 # Se a rede não existir, a criamos
@@ -32,3 +33,6 @@ down:
 reset:
 	docker-compose -f langfuse/docker-compose.yml down -v
 	docker-compose -f docker-compose.yml down -v
+
+logs api:
+	docker-compose -p $(API) -f docker-compose.yml logs -f api

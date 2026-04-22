@@ -17,13 +17,14 @@ async def talk(
     rag_agent: RAGAgent = Depends(get_rag_agent)
 ):
     try:
-        answer = await rag_agent.ainvoke(
+        result = await rag_agent.ainvoke(
             message=message,
             thread_id=thread_id
         )
         
         return {
-            "answer": answer
+            "answer": result.get("answer"),
+            "thread_id": result.get("thread_id")
         }
     except Exception as e:
         logger.exception("Fail on /talk")

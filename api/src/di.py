@@ -1,3 +1,5 @@
+from langgraph.checkpoint.base import BaseCheckpointSaver
+from langgraph.checkpoint.memory import InMemorySaver
 from fastapi import Depends, Request
 from langfuse import Langfuse
 from functools import lru_cache
@@ -41,8 +43,12 @@ def get_langfuse_client(request: Request) -> Langfuse:
 
 # --- Agents ---
 
+@lru_cache()
+def get_checkpointer() -> BaseCheckpointSaver:
+    return InMemorySaver()
+
 def get_rag_agent(
         files_service: FilesService = Depends(get_files_service),
         settings: Settings = Depends(get_settings)
     ):
-    return RAGAgent(files_service, settings)
+    return RAGAgent(files_service, settings, checkpointer=get_checkpointer())
