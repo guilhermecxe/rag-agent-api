@@ -5,13 +5,36 @@ from src.services.files_service import FilesService
 from src.settings import Settings
 
 class RAGToolkit:
+    """Conjunto de ferramentas LangChain disponibilizadas ao agente RAG.
+
+    Attributes:
+        _files_service (FilesService): Serviço de acesso ao banco de documentos.
+        _search_documents_limit (int): Número máximo de resultados por busca.
+    """
+
     def __init__(self, files_service: FilesService, settings: Settings):
+        """Inicializa o toolkit com o serviço de arquivos e o limite de busca.
+
+        Args:
+            files_service (FilesService): Serviço usado para recuperar documentos.
+            settings (Settings): Configurações com o limite de documentos retornados.
+        """
         self._files_service = files_service
         self._search_documents_limit = settings.search_documents_limit
 
-    def _search_documents(self, query: str):
-        """
-        Search for information on inner database.
+    def _search_documents(self, query: str) -> list[dict]:
+        """Realiza uma busca semântica no banco vetorial e retorna os documentos mais relevantes.
+
+        Usa similaridade de embeddings para encontrar trechos de documentos
+        relacionados à ``query``, independentemente de correspondência literal.
+
+        Args:
+            query (str): Texto da consulta a ser pesquisada semanticamente.
+
+        Returns:
+            list[dict]: Lista de dicionários com as chaves:
+                - ``title`` (str): Título do documento de origem.
+                - ``content`` (str): Trecho de texto do documento.
         """
         documents = self._files_service.search_documents(
             query=query, limit=self._search_documents_limit
@@ -26,7 +49,12 @@ class RAGToolkit:
 
         return formatted_documents
 
-    def get_tools(self):
+    def get_tools(self) -> list[StructuredTool]:
+        """Retorna a lista de ferramentas LangChain registradas no toolkit.
+
+        Returns:
+            list[StructuredTool]: Ferramentas prontas para uso pelo agente.
+        """
         return [
             StructuredTool.from_function(
                 func=self._search_documents,

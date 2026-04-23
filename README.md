@@ -36,6 +36,7 @@ Os comandos `make` assumem que existe uma pasta `langfuse/` com o `docker-compos
 | `make up` | Sobe todos os serviços sem rebuildar |
 | `make down` | Derruba todos os serviços |
 | `make reset` | Derruba todos os serviços e remove os volumes |
+| `make logs api` | Exibe logs do serviço que executa a api |
 
 Para adicionar pacotes Python:
 ```shell
@@ -44,8 +45,8 @@ uv add --project api <package>
 
 ## Observações
 
-- O modelo de embedding utilizado é leve e roda eficientemente em CPU. A versão do Torch no projeto é a versão CPU (sem CUDA), mantendo a imagem Docker enxuta.
+- O modelo de embedding utilizado é leve e roda eficientemente em CPU e, por isso, a versão do Torch no projeto é a versão CPU (sem CUDA), mantendo a imagem Docker enxuta.
 - O chunking aplicado a PDFs é feito separando páginas.
 
 ## TODO
-- Adicionar memória de curto e longo prazo aos agentes
+- Adicionar documentação aos endpoints, funções e classes.

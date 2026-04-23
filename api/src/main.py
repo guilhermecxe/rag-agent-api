@@ -27,6 +27,8 @@ logging.getLogger().addHandler(log_handler)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Gerencia o ciclo de vida da aplicação FastAPI.
+    """
     print("Starting up the RAG Agent API...")
     app.state.langfuse_client = get_client()
 

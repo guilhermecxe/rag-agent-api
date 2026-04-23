@@ -1,6 +1,9 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
+    """Configurações globais da aplicação carregadas via variáveis de ambiente.
+    """
+
     # Embeddings
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
 
