@@ -7,7 +7,7 @@ from functools import lru_cache
 from src.settings import Settings
 from src.services.embeddings_service import EmbeddingsService
 from src.services.chroma_service import ChromaService
-from src.services.files_service import FilesService
+from src.services.sources_service import SourcesService
 from src.services.pdf_service import PDFService
 
 from src.agents.rag_agent import RAGAgent
@@ -33,9 +33,11 @@ def get_pdf_service():
     return PDFService()
 
 @lru_cache()
-def get_files_service() -> FilesService:
-    return FilesService(
-        pdf_service=get_pdf_service(), chroma_service=get_chroma_service()
+def get_sources_service() -> SourcesService:
+    return SourcesService(
+        pdf_service=get_pdf_service(),
+        chroma_service=get_chroma_service(),
+        settings=get_settings(),
     )
 
 def get_langfuse_client(request: Request) -> Langfuse:
@@ -48,7 +50,7 @@ def get_checkpointer() -> BaseCheckpointSaver:
     return InMemorySaver()
 
 def get_rag_agent(
-        files_service: FilesService = Depends(get_files_service),
+        sources_service: SourcesService = Depends(get_sources_service),
         settings: Settings = Depends(get_settings)
     ):
-    return RAGAgent(files_service, settings, checkpointer=get_checkpointer())
+    return RAGAgent(sources_service, settings, checkpointer=get_checkpointer())

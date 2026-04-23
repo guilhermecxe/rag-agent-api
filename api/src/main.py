@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from logging.handlers import RotatingFileHandler
 import logging
 
-from .routes import files_routes, agent_routes
+from .routes import sources_routes, agent_routes
 from .auth import verify_api_key
 
 
@@ -44,7 +44,7 @@ app = FastAPI(
 
 _auth = [Depends(verify_api_key)]
 
-app.include_router(files_routes.router, prefix="/api/files", tags=["files"], dependencies=_auth)
+app.include_router(sources_routes.router, prefix="/api/sources", tags=["sources"], dependencies=_auth)
 app.include_router(agent_routes.router, prefix="/api/agent", tags=["agent"], dependencies=_auth)
 
 @app.get("/")

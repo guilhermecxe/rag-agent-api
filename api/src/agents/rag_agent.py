@@ -5,7 +5,7 @@ from langfuse.langchain import CallbackHandler
 import uuid
 
 from src.agents.tools.rag_tools import RAGToolkit
-from src.services.files_service import FilesService
+from src.services.sources_service import SourcesService
 from src.settings import Settings
 
 
@@ -17,7 +17,7 @@ class RAGAgent:
 
     Attributes:
         _model (str): Identificador do modelo LLM atual (ex.: ``"openai:gpt-4o-mini"``).
-        _files_service (FilesService): Serviço de acesso ao banco de documentos.
+        _sources_service (SourcesService): Serviço de acesso ao banco de documentos.
         _settings (Settings): Configurações da aplicação.
         _checkpointer (BaseCheckpointSaver): Gerenciador de estado das conversas.
         _llm: Instância do modelo de linguagem inicializado.
@@ -25,18 +25,18 @@ class RAGAgent:
     """
 
     def __init__(
-            self, files_service: FilesService, settings: Settings,
+            self, sources_service: SourcesService, settings: Settings,
             checkpointer: BaseCheckpointSaver
         ):
         """Inicializa e constrói o agente RAG.
 
         Args:
-            files_service (FilesService): Serviço usado pelas ferramentas de busca.
+            sources_service (SourcesService): Serviço usado pelas ferramentas de busca.
             settings (Settings): Configurações com modelo padrão e limites de busca.
             checkpointer (BaseCheckpointSaver): Saver de estado para memória de conversas.
         """
         self._model = settings.rag_agent_default_model
-        self._files_service = files_service
+        self._sources_service = sources_service
         self._settings = settings
         self._checkpointer = checkpointer
 
@@ -56,7 +56,7 @@ class RAGAgent:
         self._llm = init_chat_model(self._model)
 
         tools = RAGToolkit(
-            files_service=self._files_service, settings=self._settings
+            sources_service=self._sources_service, settings=self._settings
         ).get_tools()
 
         self._agent = create_agent(

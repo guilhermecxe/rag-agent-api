@@ -38,6 +38,7 @@ class PDFService:
                     page_content=text,
                     metadata={
                         "page": page_number+1,
+                        "index": page_number+1,
                         "title": pdf_title,
                         "type": "pdf"
                     })

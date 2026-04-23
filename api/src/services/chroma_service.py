@@ -79,6 +79,73 @@ class ChromaService:
             ["ids"]
         )
 
+    def get_excerpt(self, source_name: str, index: int) -> Document:
+        """Retorna o trecho de um documento identificado pelo título e índice.
+
+        Args:
+            source_name (str): Título do arquivo de origem.
+            index (int): Índice incremental da página (base 1).
+
+        Returns:
+            Document: Documento correspondente ao par ``(source_name, index)``.
+
+        Raises:
+            ValueError: Se nenhum documento for encontrado para os parâmetros fornecidos.
+        """
+        result = self._vector_store.get(
+            where={"$and": [{"title": {"$eq": source_name}}, {"index": {"$eq": index}}]},
+            include=["documents", "metadatas"],
+        )
+        if not result["documents"]:
+            raise ValueError(
+                f"Nenhum trecho encontrado para source_name='{source_name}', index={index}."
+            )
+        return Document(
+            page_content=result["documents"][0],
+            metadata=result["metadatas"][0],
+        )
+
+    def search_excerpts_regex(
+        self, pattern: str, sources: list[str] | None = None
+    ) -> list[Document]:
+        """Busca documentos cujo conteúdo corresponde a um padrão regex.
+
+        Args:
+            pattern (str): Expressão regular aplicada ao conteúdo dos documentos.
+            sources (list[str] | None): Títulos de arquivos que limitam a busca.
+                Se ``None``, busca em todos os documentos.
+
+        Returns:
+            list[Document]: Documentos cujo conteúdo corresponde ao padrão.
+        """
+        where = {"title": {"$in": sources}} if sources else None
+        result = self._vector_store.get(
+            where=where,
+            where_document={"$regex": pattern},
+            include=["documents", "metadatas"],
+        )
+        return [
+            Document(page_content=content, metadata=metadata)
+            for content, metadata in zip(result["documents"], result["metadatas"])
+        ]
+
+    def search_excerpts_semantic(
+        self, query: str, limit: int, source_names: list[str] | None = None
+    ) -> list[Document]:
+        """Busca trechos semanticamente similares à query, com filtro opcional por fonte.
+
+        Args:
+            query (str): Texto da consulta.
+            limit (int): Número máximo de resultados.
+            source_names (list[str] | None): Títulos de arquivos que limitam a busca.
+                Se ``None``, busca em todos os documentos.
+
+        Returns:
+            list[Document]: Trechos mais similares à query.
+        """
+        filter_ = {"title": {"$in": source_names}} if source_names else None
+        return self._vector_store.similarity_search(query=query, k=limit, filter=filter_)
+
     def search_documents(self, query: str, limit: int) -> list[Document]:
         """Busca documentos semanticamente similares à query.
 

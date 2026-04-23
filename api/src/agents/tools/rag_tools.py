@@ -1,25 +1,25 @@
 from langchain_core.tools import StructuredTool
 from langchain.tools import tool
 
-from src.services.files_service import FilesService
+from src.services.sources_service import SourcesService
 from src.settings import Settings
 
 class RAGToolkit:
     """Conjunto de ferramentas LangChain disponibilizadas ao agente RAG.
 
     Attributes:
-        _files_service (FilesService): Serviço de acesso ao banco de documentos.
+        _sources_service (SourcesService): Serviço de acesso ao banco de documentos.
         _search_documents_limit (int): Número máximo de resultados por busca.
     """
 
-    def __init__(self, files_service: FilesService, settings: Settings):
-        """Inicializa o toolkit com o serviço de arquivos e o limite de busca.
+    def __init__(self, sources_service: SourcesService, settings: Settings):
+        """Inicializa o toolkit com o serviço de sources e o limite de busca.
 
         Args:
-            files_service (FilesService): Serviço usado para recuperar documentos.
+            sources_service (SourcesService): Serviço usado para recuperar documentos.
             settings (Settings): Configurações com o limite de documentos retornados.
         """
-        self._files_service = files_service
+        self._sources_service = sources_service
         self._search_documents_limit = settings.search_documents_limit
 
     def _search_documents(self, query: str) -> list[dict]:
@@ -33,10 +33,10 @@ class RAGToolkit:
 
         Returns:
             list[dict]: Lista de dicionários com as chaves:
-                - ``title`` (str): Título do documento de origem.
+                - ``title`` (str): Título da fonte de origem.
                 - ``content`` (str): Trecho de texto do documento.
         """
-        documents = self._files_service.search_documents(
+        documents = self._sources_service.search_documents(
             query=query, limit=self._search_documents_limit
         )
 
