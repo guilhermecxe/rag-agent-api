@@ -34,13 +34,13 @@ class ChromaService:
             persist_directory=self._settings.chroma_persist_directory,
         )
 
-    def add_documents(self, documents: list[Document]):
+    async def add_documents(self, documents: list[Document]):
         """Adiciona documentos ao banco vetorial.
 
         Args:
             documents (list[Document]): Lista de Documents LangChain a indexar.
         """
-        self._vector_store.add_documents(documents)
+        await self._vector_store.aadd_documents(documents)
 
     def get_unique_titles(self) -> list[str]:
         """Retorna os títulos únicos de todos os documentos armazenados.

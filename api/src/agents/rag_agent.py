@@ -2,14 +2,15 @@ from langgraph.checkpoint.base import BaseCheckpointSaver
 from langchain.chat_models import init_chat_model
 from langchain.agents import create_agent
 from langfuse.langchain import CallbackHandler
-import uuid
+from langfuse import propagate_attributes
 
+from src.agents.base_agent import BaseAgent
 from src.agents.tools.sources_tools import SourcesToolkit
 from src.services.sources_service import SourcesService
 from src.settings import Settings
 
 
-class RAGAgent:
+class RAGAgent(BaseAgent):
     """Agente conversacional com Retrieval-Augmented Generation (RAG).
 
     Mantém memória de conversas por thread e usa ferramentas de busca vetorial
@@ -23,6 +24,12 @@ class RAGAgent:
         _llm: Instância do modelo de linguagem inicializado.
         _agent: Grafo do agente LangGraph.
     """
+
+    description: str = (
+        "Agente RAG especializado em buscar e sintetizar informações "
+        "a partir de documentos indexados. Use quando precisar responder "
+        "perguntas com base em fontes de conhecimento específicas."
+    )
 
     def __init__(
             self, sources_service: SourcesService, settings: Settings,
@@ -42,15 +49,6 @@ class RAGAgent:
 
         self._build()
 
-    def _rebuild(self, model: str):
-        """Substitui o modelo LLM e reconstrói o agente.
-
-        Args:
-            model (str): Novo identificador de modelo (ex.: ``"openai:gpt-4o"``).
-        """
-        self._model = model
-        self._build()
-
     def _build(self):
         """Instancia o LLM, cria as ferramentas RAG e compila o grafo do agente."""
         self._llm = init_chat_model(self._model)
@@ -66,29 +64,10 @@ class RAGAgent:
             checkpointer=self._checkpointer
         )
 
-    async def _assert_thread_id(self, thread_id: str | None) -> str:
-        """Valida ou gera um thread_id para a conversa.
-
-        Se ``thread_id`` não for fornecido, cria um novo UUID. Se for fornecido,
-        verifica que existe no checkpointer.
-
-        Args:
-            thread_id (str | None): ID da conversa existente ou ``None`` para nova.
-
-        Returns:
-            str: Thread ID válido para uso na invocação.
-
-        Raises:
-            ValueError: Se o ``thread_id`` fornecido não existir no checkpointer.
-        """
-        if not thread_id:
-            thread_id = str(uuid.uuid4())
-        elif not await self._checkpointer.aget({"configurable": {"thread_id": thread_id}}):
-            raise ValueError(f"The provided thread_id ({thread_id}) does not exist.")
-
-        return thread_id
-
-    async def ainvoke(self, message: str, thread_id: str = None, model: str = None) -> dict:
+    async def ainvoke(
+            self, message: str, thread_id: str = None,
+            model: str = None, as_tool: bool = False
+        ) -> dict:
         """Envia uma mensagem ao agente e retorna a resposta.
 
         Args:
@@ -107,21 +86,26 @@ class RAGAgent:
 
         input = {"messages": [{"role": "user", "content": message}]}
 
-        callbacks = [
+        callbacks = []
+        configurable = {}
+        thread_id = None
+        if not as_tool:
             # O cliente Langfuse é inicializado em api/main.py para
             # o handler funcionar.
-            CallbackHandler()
-        ]
+            callbacks.append(CallbackHandler())
 
-        thread_id = await self._assert_thread_id(thread_id)
+            # Criando thread para salvar histórico
+            thread_id = await self._assert_thread_id(thread_id)
+            configurable["thread_id"] = thread_id
 
-        response = await self._agent.ainvoke(
-            input=input,
-            config={
-                "callbacks": callbacks,
-                "configurable": {"thread_id": thread_id}
-            }
-        )
+        with propagate_attributes(trace_name="RAGAgent", session_id=thread_id):
+            response = await self._agent.ainvoke(
+                input=input,
+                config={
+                    "callbacks": callbacks,
+                    "configurable": configurable
+                }
+            )
 
         answer = response["messages"][-1].content
         return {
@@ -129,3 +113,9 @@ class RAGAgent:
             "thread_id": thread_id
         }
     
+    async def ainvoke_as_tool(self, message: str) -> str:
+        result = await self.ainvoke(
+            message=message,
+            as_tool=True
+        )
+        return result["answer"]

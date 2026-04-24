@@ -5,8 +5,9 @@ from dotenv import load_dotenv
 from logging.handlers import RotatingFileHandler
 import logging
 
-from .routes import sources_routes, agent_routes
+from .routes import agents_routes, sources_routes
 from .auth import verify_api_key
+from .di import get_settings, get_embeddings_service, get_chroma_service, get_sources_service, get_checkpointer
 
 
 load_dotenv()
@@ -30,6 +31,14 @@ async def lifespan(app: FastAPI):
     """Gerencia o ciclo de vida da aplicação FastAPI.
     """
     print("Starting up the RAG Agent API...")
+
+    # Warm-up dos serviços
+    get_settings()
+    get_embeddings_service()
+    get_chroma_service()
+    get_sources_service()
+    get_checkpointer()
+    
     app.state.langfuse_client = get_client()
 
     yield
@@ -45,7 +54,7 @@ app = FastAPI(
 _auth = [Depends(verify_api_key)]
 
 app.include_router(sources_routes.router, prefix="/api/sources", tags=["sources"], dependencies=_auth)
-app.include_router(agent_routes.router, prefix="/api/agent", tags=["agent"], dependencies=_auth)
+app.include_router(agents_routes.router, prefix="/api/agents", tags=["agents"], dependencies=_auth)
 
 @app.get("/")
 async def root():

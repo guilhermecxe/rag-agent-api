@@ -35,7 +35,7 @@ async def upload_source(
         HTTPException: 500 se ocorrer qualquer erro durante o upload ou indexação.
     """
     try:
-        sources_service.upload(
+        await sources_service.upload(
             source_bytes=await file.read(),
             source_title=file.filename,
             source_type="pdf"

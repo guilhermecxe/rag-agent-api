@@ -13,4 +13,4 @@ class Settings(BaseSettings):
 
     # Agent
     rag_agent_default_model: str = "openai:gpt-4o-mini"
-    search_documents_limit: int = 5
+    conversational_agent_default_model: str = "openai:gpt-5-nano"

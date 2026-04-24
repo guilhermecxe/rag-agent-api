@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 
-class TalkRequest(BaseModel):
+class AgentRequest(BaseModel):
     message: str
     thread_id: Optional[str] = None
 
@@ -14,6 +14,6 @@ class TalkRequest(BaseModel):
             }
         }
 
-class TalkResponse(BaseModel):
+class AgentResponse(BaseModel):
     answer: str
     thread_id: str

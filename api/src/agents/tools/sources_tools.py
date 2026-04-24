@@ -55,8 +55,9 @@ class SourcesToolkit:
             page: Número da página a ser retornada. O índice começa em 1. Padrão: 1.
 
         Returns:
-            Lista de dicionários, cada um contendo ``source`` (nome da fonte),
-            ``index`` (posição do trecho na fonte) e ``excerpt`` (conteúdo do trecho).
+            Um dicionário contendo os excerpts (cada um contendo ``source`` (nome da fonte),
+            ``index`` (posição do trecho na fonte) e ``excerpt`` (conteúdo do trecho)), a página
+            atual de resultados e a última página disponível para essa busca.
         """
         excerpts = self._sources_service.search_excerpts_regex(
             pattern=pattern,

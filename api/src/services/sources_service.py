@@ -31,7 +31,7 @@ class SourcesService:
         self._chroma_service = chroma_service
         self._settings = settings
 
-    def upload(self, source_bytes: bytes, source_title: str, source_type: str):
+    async def upload(self, source_bytes: bytes, source_title: str, source_type: str):
         """Faz o parse e indexa uma fonte no banco vetorial.
 
         Args:
@@ -48,11 +48,11 @@ class SourcesService:
 
         if source_type == "pdf":
             documents = self._pdf_service.read(pdf_bytes=source_bytes, pdf_title=source_title)
-            self._chroma_service.add_documents(documents)
+            await self._chroma_service.add_documents(documents)
         else:
             raise NotImplementedError(f"There is no support to {source_type} type yet.")
 
-    def get_sources(self, page: int = 1) -> list[str]:
+    def get_sources(self, page: int = 1) -> dict:
         """Retorna os títulos de todas as fontes indexadas.
 
         Returns:

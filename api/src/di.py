@@ -11,6 +11,7 @@ from src.services.sources_service import SourcesService
 from src.services.pdf_service import PDFService
 
 from src.agents.rag_agent import RAGAgent
+from src.agents.conversational_agent import ConversationalAgent
 
 @lru_cache()
 def get_settings() -> Settings:
@@ -49,8 +50,18 @@ def get_langfuse_client(request: Request) -> Langfuse:
 def get_checkpointer() -> BaseCheckpointSaver:
     return InMemorySaver()
 
-def get_rag_agent(
-        sources_service: SourcesService = Depends(get_sources_service),
-        settings: Settings = Depends(get_settings)
-    ):
-    return RAGAgent(sources_service, settings, checkpointer=get_checkpointer())
+@lru_cache()
+def get_rag_agent():
+    return RAGAgent(
+        sources_service=get_sources_service(),
+        settings=get_settings(),
+        checkpointer=get_checkpointer()
+    )
+
+@lru_cache()
+def get_conversational_agent():
+    return ConversationalAgent(
+        settings=get_settings(),
+        checkpointer=get_checkpointer(),
+        subagents=[get_rag_agent()]
+    )
