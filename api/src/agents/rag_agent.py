@@ -4,7 +4,7 @@ from langchain.agents import create_agent
 from langfuse.langchain import CallbackHandler
 import uuid
 
-from src.agents.tools.rag_tools import RAGToolkit
+from src.agents.tools.sources_tools import SourcesToolkit
 from src.services.sources_service import SourcesService
 from src.settings import Settings
 
@@ -55,8 +55,8 @@ class RAGAgent:
         """Instancia o LLM, cria as ferramentas RAG e compila o grafo do agente."""
         self._llm = init_chat_model(self._model)
 
-        tools = RAGToolkit(
-            sources_service=self._sources_service, settings=self._settings
+        tools = SourcesToolkit(
+            sources_service=self._sources_service
         ).get_tools()
 
         self._agent = create_agent(

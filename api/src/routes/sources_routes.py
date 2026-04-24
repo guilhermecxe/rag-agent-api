@@ -38,7 +38,10 @@ async def upload_source(
 
 
 @router.get("/get_sources")
-async def get_sources(sources_service: SourcesService = Depends(get_sources_service)):
+async def get_sources(
+    page: int = 1,
+    sources_service: SourcesService = Depends(get_sources_service)
+):
     """Retorna os nomes de todos os sources indexados.
 
     Args:
@@ -51,7 +54,7 @@ async def get_sources(sources_service: SourcesService = Depends(get_sources_serv
         HTTPException: 500 se ocorrer qualquer erro ao consultar o banco vetorial.
     """
     try:
-        source_names = sources_service.get_sources()
+        source_names = sources_service.get_sources(page=page)
 
         return {
             "source_names": source_names

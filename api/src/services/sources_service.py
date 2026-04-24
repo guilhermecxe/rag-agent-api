@@ -52,13 +52,35 @@ class SourcesService:
         else:
             raise NotImplementedError(f"There is no support to {source_type} type yet.")
 
-    def get_sources(self) -> list[str]:
+    def get_sources(self, page: int = 1) -> list[str]:
         """Retorna os títulos de todas as fontes indexadas.
 
         Returns:
             list[str]: Lista de títulos únicos presentes no banco vetorial.
         """
-        return self._chroma_service.get_unique_titles()
+        sources_per_page = 10
+        sources = self._chroma_service.get_unique_titles()
+
+        if not sources:
+            return {
+                "sources": [],
+                "current_page": 0,
+                "last_page": 0,
+            }
+
+        first_index = sources_per_page*(page-1)
+        last_index = first_index + sources_per_page
+
+        if first_index+1 > len(sources):
+            raise ValueError("Essa página não existe para a busca feita.")
+
+        page_sources = sources[first_index:last_index]
+
+        return {
+            "sources": page_sources,
+            "current_page": page,
+            "last_page": math.ceil(len(sources) / sources_per_page)
+        }
 
     def search_sources_regex(self, pattern: str, page: int = 1) -> dict:
         """Busca fontes cujo título corresponde a um padrão regex.
@@ -76,21 +98,28 @@ class SourcesService:
         Raises:
             ValueError: Se ``page`` estiver além do número de páginas disponíveis.
         """
-        sources_per_page = 5
-        sources = self.get_sources()
+        sources_per_page = 10
+        sources = self._chroma_service.get_unique_titles()
 
         relevant_sources = []
         for source in sources:
             if re.search(pattern, source, flags=re.IGNORECASE):
                 relevant_sources.append(source)
 
+        if not relevant_sources:
+            return {
+                "relevant_sources": [],
+                "current_page": 0,
+                "last_page": 0,
+            }
+
         first_page_source_index = sources_per_page*(page-1)
-        last_page_source_index = first_page_source_index + 4
+        last_page_source_index = first_page_source_index + sources_per_page
 
         if first_page_source_index+1 > len(relevant_sources):
             raise ValueError("Essa página não existe para a busca feita.")
 
-        page_relevant_sources = relevant_sources[first_page_source_index:last_page_source_index+1]
+        page_relevant_sources = relevant_sources[first_page_source_index:last_page_source_index]
 
         return {
             "relevant_sources": page_relevant_sources,
@@ -138,6 +167,13 @@ class SourcesService:
         excerpts = self._chroma_service.search_excerpts_regex(
             pattern=pattern, sources=sources
         )
+
+        if not excerpts:
+            return {
+                "relevant_excerpts": [],
+                "current_page": 0,
+                "last_page": 0,
+            }
 
         first = excerpts_per_page * (page - 1)
         last = first + excerpts_per_page
