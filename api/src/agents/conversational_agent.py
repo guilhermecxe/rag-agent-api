@@ -4,10 +4,10 @@ from langchain.chat_models import init_chat_model
 from langchain.agents import create_agent
 from langfuse.langchain import CallbackHandler
 from langfuse import propagate_attributes
-import uuid
 
 from src.agents.base_agent import BaseAgent
 from src.agents.middlewares import trim_messages
+from src.agents.prompts.conversational_agent import SYSTEM_PROMPT
 from src.settings import Settings
 
 
@@ -36,7 +36,7 @@ class ConversationalAgent(BaseAgent):
         
         self._agent = create_agent(
             model=self._llm,
-            system_prompt="",
+            system_prompt=SYSTEM_PROMPT,
             tools=tools,
             checkpointer=self._checkpointer,
             middleware=[trim_messages]

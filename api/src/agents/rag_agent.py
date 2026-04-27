@@ -6,6 +6,7 @@ from langfuse import propagate_attributes
 
 from src.agents.base_agent import BaseAgent
 from src.agents.tools.sources_tools import SourcesToolkit
+from src.agents.prompts.rag_agent import SYSTEM_PROMPT, SYSTEM_PROMPT_AS_TOOL
 from src.services.sources_service import SourcesService
 from src.settings import Settings
 
@@ -50,7 +51,7 @@ class RAGAgent(BaseAgent):
         self._build()
 
     def _build(self):
-        """Instancia o LLM, cria as ferramentas RAG e compila o grafo do agente."""
+        """Instancia o LLM, cria as ferramentas RAG e compila os grafos do agente."""
         self._llm = init_chat_model(self._model)
 
         tools = SourcesToolkit(
@@ -59,9 +60,15 @@ class RAGAgent(BaseAgent):
 
         self._agent = create_agent(
             model=self._llm,
-            system_prompt="",
+            system_prompt=SYSTEM_PROMPT,
             tools=tools,
             checkpointer=self._checkpointer
+        )
+
+        self._agent_as_tool = create_agent(
+            model=self._llm,
+            system_prompt=SYSTEM_PROMPT_AS_TOOL,
+            tools=tools,
         )
 
     async def ainvoke(
@@ -89,7 +96,10 @@ class RAGAgent(BaseAgent):
         callbacks = []
         configurable = {}
         thread_id = None
-        if not as_tool:
+        if as_tool:
+            agent = self._agent_as_tool
+        else:
+            agent = self._agent
             # O cliente Langfuse é inicializado em api/main.py para
             # o handler funcionar.
             callbacks.append(CallbackHandler())
@@ -99,7 +109,7 @@ class RAGAgent(BaseAgent):
             configurable["thread_id"] = thread_id
 
         with propagate_attributes(trace_name="RAGAgent", session_id=thread_id):
-            response = await self._agent.ainvoke(
+            response = await agent.ainvoke(
                 input=input,
                 config={
                     "callbacks": callbacks,

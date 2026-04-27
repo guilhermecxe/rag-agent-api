@@ -114,7 +114,7 @@ class SourcesToolkit:
 
         Args:
             source_name: Nome exato da fonte à qual o trecho pertence.
-            index: Posição do trecho dentro da fonte.
+            index: Posição do trecho dentro da fonte. O índice começa em 1.
 
         Returns:
             Dicionário contendo ``source`` (nome da fonte), ``index`` (posição do trecho)
