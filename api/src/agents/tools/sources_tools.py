@@ -17,9 +17,12 @@ class SourcesToolkit:
             Dicionário contendo as fontes disponíveis da página requisitada,
             incluindo o número da página e o número da última página disponível.
         """
-        sources = self._sources_service.get_sources(page=page)
-        return sources
-    
+        try:
+            sources = self._sources_service.get_sources(page=page)
+            return sources
+        except Exception as e:
+            return {"error": str(e)}
+
     def _search_sources_regex(self, pattern: str, page: int = 1) -> dict:
         """Busca fontes cujo nome corresponde a um padrão de expressão regular.
 
@@ -36,9 +39,12 @@ class SourcesToolkit:
             Dicionário contendo as fontes cujos nomes correspondem ao padrão,
             incluindo o número da página e o número da última página disponível.
         """
-        sources = self._sources_service.search_sources_regex(pattern=pattern, page=page)
-        return sources
-    
+        try:
+            sources = self._sources_service.search_sources_regex(pattern=pattern, page=page)
+            return sources
+        except Exception as e:
+            return {"error": str(e)}
+
     def _search_excerpts_regex(self, pattern: str, sources: list[str] | None = None, page: int = 1) -> dict:
         """Busca trechos de documentos cujo conteúdo corresponde a um padrão de expressão regular.
 
@@ -59,25 +65,28 @@ class SourcesToolkit:
             ``index`` (posição do trecho na fonte) e ``excerpt`` (conteúdo do trecho)), a página
             atual de resultados e a última página disponível para essa busca.
         """
-        excerpts = self._sources_service.search_excerpts_regex(
-            pattern=pattern,
-            sources=sources,
-            page=page
-        )
+        try:
+            excerpts = self._sources_service.search_excerpts_regex(
+                pattern=pattern,
+                sources=sources,
+                page=page
+            )
 
-        results = [{
-            "source": excerpt.metadata["title"],
-            "index": excerpt.metadata["index"],
-            "excerpt": excerpt.page_content
-        } for excerpt in excerpts["relevant_excerpts"]]
-        
-        return {
-            "excerpts": results,
-            "current_page": excerpts["current_page"],
-            "last_page": excerpts["last_page"],
-        }
-    
-    def _search_excerpts_semantic(self, query: str, sources: list[str] | None = None) -> list[dict]:
+            results = [{
+                "source": excerpt.metadata["title"],
+                "index": excerpt.metadata["index"],
+                "excerpt": excerpt.page_content
+            } for excerpt in excerpts["relevant_excerpts"]]
+
+            return {
+                "excerpts": results,
+                "current_page": excerpts["current_page"],
+                "last_page": excerpts["last_page"],
+            }
+        except Exception as e:
+            return {"error": str(e)}
+
+    def _search_excerpts_semantic(self, query: str, sources: list[str] | None = None) -> list[dict] | dict:
         """Busca trechos de documentos semanticamente similares à query.
 
         Prefira esta ferramenta a ``_search_excerpts_regex`` quando a intenção de busca
@@ -96,18 +105,21 @@ class SourcesToolkit:
             Lista de dicionários, cada um contendo ``source`` (nome da fonte),
             ``index`` (posição do trecho na fonte) e ``excerpt`` (conteúdo do trecho).
         """
-        excerpts = self._sources_service.search_excerpts_semantic(
-            query=query,
-            source_names=sources,
-        )
+        try:
+            excerpts = self._sources_service.search_excerpts_semantic(
+                query=query,
+                source_names=sources,
+            )
 
-        return [{
-            "source": excerpt.metadata["title"],
-            "index": excerpt.metadata["index"],
-            "excerpt": excerpt.page_content,
-        } for excerpt in excerpts]
+            return [{
+                "source": excerpt.metadata["title"],
+                "index": excerpt.metadata["index"],
+                "excerpt": excerpt.page_content,
+            } for excerpt in excerpts]
+        except Exception as e:
+            return {"error": str(e)}
 
-    def _get_excerpt(self, source_name: str, index: int) -> str:
+    def _get_excerpt(self, source_name: str, index: int) -> dict:
         """Recupera o conteúdo de um trecho específico de uma fonte.
 
         É útil para recuperar trechos vizinhos ao incrementar ou decrementar o índice.
@@ -120,16 +132,19 @@ class SourcesToolkit:
             Dicionário contendo ``source`` (nome da fonte), ``index`` (posição do trecho)
             e ``excerpt`` (conteúdo completo do trecho).
         """
-        excerpt = self._sources_service.get_excerpt(
-            source_name=source_name,
-            index=index
-        )
+        try:
+            excerpt = self._sources_service.get_excerpt(
+                source_name=source_name,
+                index=index
+            )
 
-        return {
-            "source": source_name,
-            "index": index,
-            "excerpt": excerpt.page_content
-        }
+            return {
+                "source": source_name,
+                "index": index,
+                "excerpt": excerpt.page_content
+            }
+        except Exception as e:
+            return {"error": str(e)}
     
     def get_tools(self) -> list[StructuredTool]:
         return [
