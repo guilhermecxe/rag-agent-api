@@ -3,7 +3,7 @@ import streamlit as st
 import logging
 import os
 
-# from views.sidebar_view import show_sidebar
+from views.sidebar_view import show_sidebar
 
 load_dotenv()
 
@@ -18,11 +18,12 @@ logging.getLogger("watchdog").setLevel(logging.WARNING)
 
 # Controle de páginas
 pages = [
-    st.Page(page="views/chat_view.py", title="Conversational Agent")
+    st.Page(page="views/chat_view.py", title="Agente Conversacional"),
+    st.Page(page="views/sources_view.py", title="Gerenciamento de Fontes"),
 ]
 
 # Sidebar
-# show_sidebar()
+show_sidebar()
 
 pg = st.navigation(pages)
 pg.run()

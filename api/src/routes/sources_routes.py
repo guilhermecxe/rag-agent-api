@@ -67,6 +67,8 @@ async def get_sources(
         result = sources_service.get_sources(page=page)
 
         return GetSourcesResponse(sources=SourcesPage(**result))
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -88,6 +90,8 @@ async def search_sources_regex(
             current_page=result["current_page"],
             last_page=result["last_page"],
         )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
