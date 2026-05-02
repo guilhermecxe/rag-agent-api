@@ -10,7 +10,7 @@ from src.services.chroma_service import ChromaService
 from src.services.sources_service import SourcesService
 from src.services.pdf_service import PDFService
 
-from src.agents.rag_agent import RAGAgent
+from src.agents.knowledge_agent import KnowledgeAgent
 from src.agents.conversational_agent import ConversationalAgent
 
 @lru_cache()
@@ -51,8 +51,8 @@ def get_checkpointer() -> BaseCheckpointSaver:
     return InMemorySaver()
 
 @lru_cache()
-def get_rag_agent():
-    return RAGAgent(
+def get_knowledge_agent():
+    return KnowledgeAgent(
         sources_service=get_sources_service(),
         settings=get_settings(),
         checkpointer=get_checkpointer()
@@ -63,5 +63,5 @@ def get_conversational_agent():
     return ConversationalAgent(
         settings=get_settings(),
         checkpointer=get_checkpointer(),
-        subagents=[get_rag_agent()]
+        subagents=[get_knowledge_agent()]
     )

@@ -12,5 +12,5 @@ class Settings(BaseSettings):
     chroma_persist_directory: str = "data/chroma_db"
 
     # Agent
-    rag_agent_default_model: str = "openai:gpt-4o-mini"
+    knowledge_agent_default_model: str = "openai:gpt-4o-mini"
     conversational_agent_default_model: str = "openai:gpt-5-nano"

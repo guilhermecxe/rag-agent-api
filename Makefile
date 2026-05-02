@@ -6,8 +6,9 @@ PROJECT  = rag-agent
 
 help:
 	@echo "Targets disponíveis:"
-	@echo "  make build     	 - Constrói e sobe todos os serviços"
+	@echo "  make build     	 - Constrói todos os serviços"
 	@echo "  make up        	 - Sobe todos os serviços"
+	@echo "  make build-up    	 - Constrói e sobe todos os serviços"
 	@echo "  make down      	 - Derruba todos os serviços"
 	@echo "  make reset     	 - down + remove todos os volumes"
 	@echo "  make logs api  	 - Exibe logs do serviço que executa a api"
@@ -20,12 +21,14 @@ network:
 	docker network create $(NETWORK)
 
 build: network
-	docker-compose -p $(LANGFUSE) -f langfuse/docker-compose.yml up -d --build
-	docker-compose -p $(PROJECT) -f docker-compose.yml up -d --build
+	docker-compose -p $(LANGFUSE) -f langfuse/docker-compose.yml build
+	docker-compose -p $(PROJECT) -f docker-compose.yml build
 
 up: network
 	docker-compose -p $(LANGFUSE) -f langfuse/docker-compose.yml up -d
 	docker-compose -p $(PROJECT) -f docker-compose.yml up -d
+
+build-up: build up
 
 down:
 	docker-compose -p $(LANGFUSE) -f langfuse/docker-compose.yml down

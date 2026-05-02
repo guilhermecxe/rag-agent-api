@@ -6,16 +6,16 @@ from langfuse import propagate_attributes
 
 from src.agents.base_agent import BaseAgent
 from src.agents.tools.sources_tools import SourcesToolkit
-from src.agents.prompts.rag_agent import SYSTEM_PROMPT, SYSTEM_PROMPT_AS_TOOL
+from src.agents.prompts.knowledge_agent import SYSTEM_PROMPT, SYSTEM_PROMPT_AS_TOOL
 from src.services.sources_service import SourcesService
 from src.settings import Settings
 
 
-class RAGAgent(BaseAgent):
-    """Agente conversacional com Retrieval-Augmented Generation (RAG).
+class KnowledgeAgent(BaseAgent):
+    """Agente especializado em acessar a base de conhecimento indexada.
 
-    Mantém memória de conversas por thread e usa ferramentas de busca vetorial
-    para enriquecer as respostas do LLM com documentos relevantes.
+    Mantém memória de conversas por thread e usa ferramentas de busca para
+    recuperar e sintetizar informações dos documentos indexados.
 
     Attributes:
         _model (str): Identificador do modelo LLM atual (ex.: ``"openai:gpt-4o-mini"``).
@@ -27,23 +27,25 @@ class RAGAgent(BaseAgent):
     """
 
     description: str = (
-        "Agente RAG especializado em buscar e sintetizar informações "
-        "a partir de documentos indexados. Use quando precisar responder "
-        "perguntas com base em fontes de conhecimento específicas."
+        "Agente especializado em acessar a base de conhecimento indexada. "
+        "Pode listar as fontes disponíveis, buscar fontes por nome (regex), "
+        "buscar trechos por conteúdo (busca regex ou semântica) e recuperar "
+        "trechos vizinhos pelo índice para ampliar o contexto. "
+        "Use para qualquer consulta sobre o conteúdo dos documentos indexados."
     )
 
     def __init__(
             self, sources_service: SourcesService, settings: Settings,
             checkpointer: BaseCheckpointSaver
         ):
-        """Inicializa e constrói o agente RAG.
+        """Inicializa e constrói o agente de conhecimento.
 
         Args:
             sources_service (SourcesService): Serviço usado pelas ferramentas de busca.
             settings (Settings): Configurações com modelo padrão e limites de busca.
             checkpointer (BaseCheckpointSaver): Saver de estado para memória de conversas.
         """
-        self._model = settings.rag_agent_default_model
+        self._model = settings.knowledge_agent_default_model
         self._sources_service = sources_service
         self._settings = settings
         self._checkpointer = checkpointer
@@ -51,7 +53,7 @@ class RAGAgent(BaseAgent):
         self._build()
 
     def _build(self):
-        """Instancia o LLM, cria as ferramentas RAG e compila os grafos do agente."""
+        """Instancia o LLM, cria as ferramentas de busca e compila os grafos do agente."""
         self._llm = init_chat_model(self._model)
 
         tools = SourcesToolkit(
@@ -108,7 +110,7 @@ class RAGAgent(BaseAgent):
             thread_id = await self._assert_thread_id(thread_id)
             configurable["thread_id"] = thread_id
 
-        with propagate_attributes(trace_name="RAGAgent", session_id=thread_id):
+        with propagate_attributes(trace_name="KnowledgeAgent", session_id=thread_id):
             response = await agent.ainvoke(
                 input=input,
                 config={

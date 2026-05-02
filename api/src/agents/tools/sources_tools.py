@@ -90,10 +90,10 @@ class SourcesToolkit:
         """Busca trechos de documentos semanticamente similares à query.
 
         Prefira esta ferramenta a ``_search_excerpts_regex`` quando a intenção de busca
-        for expressa em linguagem natural, pois ela utiliza similaridade de embeddings
-        para encontrar trechos relevantes mesmo sem correspondência exata de termos.
-        Os resultados incluem o índice de cada trecho, que pode ser usado com
-        ``_get_excerpt`` para recuperar trechos vizinhos.
+        for expressa em linguagem natural e/ou quando não souber o idioma do documento,
+        pois ela utiliza similaridade de embeddings para encontrar trechos relevantes
+        mesmo sem correspondência exata de termos. Os resultados incluem o índice de
+        cada trecho, que pode ser usado com ``_get_excerpt`` para recuperar trechos vizinhos.
 
         Args:
             query: Texto em linguagem natural descrevendo o que se deseja encontrar.
