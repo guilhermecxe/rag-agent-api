@@ -14,6 +14,22 @@ services:
     volumes:
       - ./api:/app
 
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      network: host
+    container_name: rag-agent-frontend
+    env_file: frontend/.env
+    environment:
+      - UV_LINK_MODE=copy
+    depends_on:
+      - api
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./frontend:/app/frontend
+
 networks:
   default:
       name: rag-agent-network
